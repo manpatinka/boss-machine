@@ -10,25 +10,16 @@ const {
 } = require('../db');
 
 const ideas = getAllFromDatabase('ideas');
+const checkMillionDollarIdea = require('../checkMillionDollarIdea');
 
 ideasRouter
   .route('/')
   .get((req, res, next) => {
     res.send(ideas);
   })
-  .post((req, res, next) => {
-    let { id, name, description, numWeeks, weeklyRevenue } = req.query;
-    id = String(id);
-    name = String(name);
-    description = String(description);
-    numWeeks = Number(numWeeks);
-    weeklyRevenue = Number(weeklyRevenue);
-    if (id && name && description && numWeeks && weeklyRevenue) {
-      addToDatabase('ideas', { id, name, description, numWeeks, weeklyRevenue });
-      res.send(`New idea named ${name} has been successfully added!`)
-    } else {
-      res.status(400).send()
-    }
+  .post(checkMillionDollarIdea, (req, res, next) => {
+    const newIdea = addToDatabase('ideas', req.body);
+    res.status(201).send(newIdea);
   })
 
 ideasRouter.param('ideaId', (req, res, next, ideaId) => {
@@ -48,23 +39,18 @@ ideasRouter
     const idea = getFromDatabaseById('ideas', req.ideaId);
     res.send(idea);
   })
-  .put((req, res, next) => {
-    let { id, name, description, numWeeks, weeklyRevenue } = req.query;
-    id = String(id);
-    name = String(name);
-    description = String(description);
-    numWeeks = Number(numWeeks);
-    weeklyRevenue = Number(weeklyRevenue);
-    if (id && name && description && numWeeks && weeklyRevenue) {
-      const updatedIdea = updateInstanceInDatabase('ideas', { id, name, description, numWeeks, weeklyRevenue });
-      res.send(updatedIdea);
-    } else {
-      res.status(400).send()
-    }
+  .put(checkMillionDollarIdea, (req, res, next) => {
+    let updatedInstance = updateInstanceInDatabase('ideas', req.body);
+    res.send(updatedInstance);
   })
   .delete((req, res, next) => {
-    deleteFromDatabasebyId('ideas', req.ideaId);
-    res.status(204).send();
+    const deleted = deleteFromDatabasebyId('ideas', req.ideaId);
+    if(deleted) {
+      res.status(204).send();
+    } else {
+      res.status(500).send();
+    }
+    
   })
 
 module.exports = ideasRouter;

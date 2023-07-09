@@ -3,6 +3,7 @@ const meetingsRouter = express.Router();
 
 const {
     createMeeting,
+    addToDatabase,
     getAllFromDatabase,
     deleteAllFromDatabase
 } = require('../db');
@@ -15,7 +16,7 @@ meetingsRouter
         res.send(meetings);
     })
     .post((req, res, next) => {
-        const newMeeting = createMeeting();
+        let newMeeting = addToDatabase('meetings', createMeeting());
         res.status(201).send(newMeeting);
     })
     .delete((req, res, next) => {

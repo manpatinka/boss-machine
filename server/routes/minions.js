@@ -16,17 +16,8 @@ minionsRouter
     res.send(minions);
   })
   .post((req, res, next) => {
-    let { id, name, title, salary } = req.query;
-    id = String(id);
-    name = String(name);
-    title = String(title);
-    salary = Number(salary);
-    if (id && name && title && salary) {
-      addToDatabase('minions', { id, name, title, salary });
-      res.send(`${name} has been successfully added!`)
-    } else {
-      res.status(400).send()
-    }
+    const newMinion = addToDatabase('minions', req.body);
+    res.status(201).send(newMinion);
   })
 
 minionsRouter.param('minionId', (req, res, next, minionId) => {
@@ -47,21 +38,16 @@ minionsRouter
     res.send(req.minion);
   })
   .put((req, res, next) => {
-    let { id, name, title, salary } = req.query;
-    id = String(id);
-    name = String(name);
-    title = String(title);
-    salary = Number(salary);
-    if (id && name && title && salary) {
-      const updatedMinion = updateInstanceInDatabase('minions', { id, name, title, salary });
-      res.send(updatedMinion);
-    } else {
-      res.status(400).send()
-    }
+    let updatedMinionInstance = updateInstanceInDatabase('minions', req.body);
+    res.send(updatedMinionInstance);
   })
   .delete((req, res, next) => {
-    deleteFromDatabasebyId('minions', req.minionId);
-    res.status(204).send();
+    const deleted = deleteFromDatabasebyId('minions', req.minionId);
+    if(deleted) {
+      res.status(204).send();
+    } else {
+      res.status(500).send();
+    }
   })
 
 module.exports = minionsRouter;
